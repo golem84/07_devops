@@ -15,13 +15,13 @@ spec:
       labels:
         app: flask-app
         svc: front
-      spec:
-        containers:
-          - name: flask
-            image: flask:v1
-            imagePullPolicy: IfNotPresent
-            ports:
-            - containerPort: 5000
-            resources:
-              limits:
-                memory: "256Mi"
+    spec:
+      containers:
+        - name: flask
+          image: flask:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+          - containerPort: 5000
+          resources:
+            limits:
+              memory: "256Mi"
