@@ -20,4 +20,4 @@ def get_hit_count():
 @app.route('/')
 def hello():
     count = get_hit_count()
-    return 'Hello World! I have been seen {} times. My name is: {}\n'.format(count, socket.gethostname())
+    return 'Hello World, VER: 2! I have been seen {} times. My name is: {}\n'.format(count, socket.gethostname())
