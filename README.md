@@ -254,7 +254,7 @@ flask-app-7ccffcf4cd-kr74l   0/1     ContainerCreating   0          1s
 flask-app-7ccffcf4cd-thrpw   0/1     ContainerCreating   0          1s
 redis-9f7d5587-dht2n         0/1     Pending             0          1s
 ```
-и в интерфейсе Freelens (не забываем выбрать `default` namespace):  
+и в интерфейсе Freelens (не забываем выбрать Namespace: `default` ):  
 ![alt text](./img/freelens-apply1.jpg)  
 когда нагрузка развернута, проверяем:  
 ```bash
@@ -273,11 +273,13 @@ redis            ClusterIP      10.99.19.128   <none>        6379/TCP         5m
 service-devops   LoadBalancer   10.102.5.192   10.0.2.15     8000:32501/TCP   5m58s
 ```
 > для снятия нагрузки с кластера используем команду `kubectl delete -f flask_redis_k8s/`  
+> для просмотра и удаления неполучившихся образов в minikube `minikube image ls`  
+> для удаления дефектного образа из minikube `minikube image rm <name>`  
 
-Помним, что порт 8000 уже проброшен на ВМ.  
+Помним, что порт 8000 уже проброшен на ВМ: 127.0.0.1 -> 8000:8000  
 Для взаимодействия с приложениями внутри кластера выполняем  
 `minikube tunnel --bind-address 10.0.2.15` и оставляем работать.  
-из Windows-хоста проверяем из браузера:  
+На Windows-хосте из браузера проверяем приложение:  
 ![alt text](./img/flask-check1.jpg)
 ![alt text](./img/flask-check2.jpg)  
 Приложение отображает разные имена подов и увеличивающийся счетчик из redis.  
