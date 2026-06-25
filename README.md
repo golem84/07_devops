@@ -91,7 +91,7 @@ $ sudo iptables -t nat -A PREROUTING -d 10.0.2.15 -p tcp --dport 8443 -j DNAT --
 ```
 Скачиваем и устанавливаем Freelens:  
 https://github.com/freelensapp/freelens/releases/download/v1.10.1/Freelens-1.10.1-windows-amd64.exe  
-После запуска FreeLens автоматически обнаружит настройки в папке `~/.kube` и присоединится к кластеру.
+После запуска Freelens автоматически обнаружит настройки в папке `~/.kube` и присоединится к кластеру.
 ![alt text](./img/freelens-connected.jpg)  
 ## 1. Подготавливаем и разворачиваем приложение flask+redis
 
@@ -125,7 +125,7 @@ def hello():
     # изменяем эту строку: 
     return 'Hello World! I have been seen {} times. My name is: {}\n'.format(count, socket.gethostname())
 ```  
-Пушим на github и забираем в виртуалку `git push` из windows, `git pull` из ВМ
+Пушим на github и забираем в виртуалку: `git push` из windows, `git pull` из ВМ
 ### 1.2. Передаем образы в minikube   
 ```bash
 $ minikube image build -t flask:v1 flask_redis/
@@ -237,7 +237,7 @@ spec:
       targetPort: 6379
 ```
 ### 1.4. Запускаем нагрузку на кластере и проверяем   
-Делаем `git push` на windows-хосте, `git pull` на ВМ  
+Делаем `git push` на Windows-хосте, `git pull` на ВМ  
 Внутри ВМ выполняем команду `kubectl apply -f flask_redis_k8s/` - разворачиваем нагрузку на кластер,  
 наблюдаем за разворачиванием подов в командной строке...  
 ```bash
@@ -276,9 +276,10 @@ service-devops   LoadBalancer   10.102.5.192   10.0.2.15     8000:32501/TCP   5m
 
 Помним, что порт 8000 уже проброшен на ВМ.  
 Для взаимодействия с приложениями внутри кластера выполняем  
-`minikube tunnel --bind-address 10.0.2.15` - и оставляем работать.  
+`minikube tunnel --bind-address 10.0.2.15` и оставляем работать.  
 из Windows-хоста проверяем из браузера:  
 ![alt text](./img/flask-check1.jpg)
-![alt text](./img/flask-check2.jpg)
+![alt text](./img/flask-check2.jpg)  
+
 Приложение отображает разные имена подов и увеличивающийся счетчик из redis.  
 
