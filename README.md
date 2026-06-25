@@ -254,7 +254,7 @@ flask-app-7ccffcf4cd-kr74l   0/1     ContainerCreating   0          1s
 flask-app-7ccffcf4cd-thrpw   0/1     ContainerCreating   0          1s
 redis-9f7d5587-dht2n         0/1     Pending             0          1s
 ```
-и в интерфейсе Freelens (не забываем выбрать `default` namespace):  
+и в интерфейсе Freelens (не забываем выбрать Namespace: `default` ):  
 ![alt text](./img/freelens-apply1.jpg)  
 когда нагрузка развернута, проверяем:  
 ```bash
@@ -273,12 +273,81 @@ redis            ClusterIP      10.99.19.128   <none>        6379/TCP         5m
 service-devops   LoadBalancer   10.102.5.192   10.0.2.15     8000:32501/TCP   5m58s
 ```
 > для снятия нагрузки с кластера используем команду `kubectl delete -f flask_redis_k8s/`  
+> для просмотра и удаления неполучившихся образов в minikube `minikube image ls`  
+> для удаления дефектного образа из minikube `minikube image rm <name>`  
 
-Помним, что порт 8000 уже проброшен на ВМ.  
+Помним, что порт 8000 уже проброшен на ВМ: 127.0.0.1 -> 8000:8000  
 Для взаимодействия с приложениями внутри кластера выполняем  
 `minikube tunnel --bind-address 10.0.2.15` и оставляем работать.  
-из Windows-хоста проверяем из браузера:  
+На Windows-хосте из браузера проверяем приложение:  
 ![alt text](./img/flask-check1.jpg)
 ![alt text](./img/flask-check2.jpg)  
 Приложение отображает разные имена подов и увеличивающийся счетчик из redis.  
 
+## 2. Обновляем приложение flask+redis  
+
+### 2.1. Вносим изменения в приложение app.py  
+```bash
+$ git diff master -- ./flask_redis/app.py
+diff --git a/flask_redis/app.py b/flask_redis/app.py
+index 017d8eb..047bd72 100644
+--- a/flask_redis/app.py
++++ b/flask_redis/app.py
+@@ -20,4 +20,4 @@ def get_hit_count():
+ @app.route('/')
+ def hello():
+     count = get_hit_count()
+-    return 'Hello World! I have been seen {} times. My name is: {}\n'.format(count, socket.gethostname())
+\ No newline at end of file
++    return 'Hello World, VER: 2! I have been seen {} times. My name is: {}\n'.format(count, socket.gethostname())
+\ No newline at end of file
+```  
+### 2.2. обновляем манифест `flask_redis_k8s\flask.yml`  
+```bash
+git diff master -- ./flask_redis_k8s/flask.yml
+diff --git a/flask_redis_k8s/flask.yml b/flask_redis_k8s/flask.yml
+index c32db7f..ae28192 100644
+--- a/flask_redis_k8s/flask.yml
++++ b/flask_redis_k8s/flask.yml
+@@ -18,7 +18,7 @@ spec:
+     spec:
+       containers:
+         - name: flask
+-          image: flask:v1
++          image: flask:v2
+           imagePullPolicy: IfNotPresent
+           ports:
+           - containerPort: 5000
+```  
+Делаем git push на Windows-хосте, git pull на ВМ  
+### 2.3. Собираем новый образ flask:v2  
+`$ minikube image build -t flask:v2 flask_redis/`  
+### 2.4. Применяем изменения в кластере  
+```bash
+$ kubectl apply -f flask_redis_k8s/ && kubectl get pods
+service/service-devops unchanged
+deployment.apps/flask-app configured
+service/redis unchanged
+deployment.apps/redis unchanged
+NAME                         READY   STATUS              RESTARTS   AGE
+flask-app-7ccffcf4cd-7f2mb   1/1     Running             0          60m
+flask-app-7ccffcf4cd-g46mj   1/1     Terminating         0          31m
+flask-app-7ccffcf4cd-jlfl9   1/1     Running             0          46m
+flask-app-7ccffcf4cd-kr74l   1/1     Running             0          60m
+flask-app-7ccffcf4cd-lpnns   1/1     Running             0          46m
+flask-app-fb69c5d7f-555mj    0/1     ContainerCreating   0          3s
+flask-app-fb69c5d7f-729gl    0/1     ContainerCreating   0          2s
+flask-app-fb69c5d7f-w6lzb    0/1     Pending             0          1s
+redis-9f7d5587-dht2n         1/1     Running             0          60m
+```  
+Наблюдаем, как старые поды останавливаются, а новые создаются  
+![alt text](./img/freelens-roll-update.jpg)  
+### 2.5. Проверяем браузер  
+![alt text](./img/flask-check-v2-1.jpg)
+![alt text](./img/flask-check-v2-2.jpg)
+
+## 3. Останавливаем кластер  
+Снимаем нагрузку  
+`kubectl delete -f flask_redis_k8s/`  
+Останавливаем minikube  
+`minikube stop`  
