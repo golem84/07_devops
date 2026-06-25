@@ -280,6 +280,5 @@ service-devops   LoadBalancer   10.102.5.192   10.0.2.15     8000:32501/TCP   5m
 из Windows-хоста проверяем из браузера:  
 ![alt text](./img/flask-check1.jpg)
 ![alt text](./img/flask-check2.jpg)  
-
 Приложение отображает разные имена подов и увеличивающийся счетчик из redis.  
 
